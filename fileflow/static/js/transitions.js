@@ -3,6 +3,7 @@
 (() => {
   const body = document.body;
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  body.classList.add("transitions-ready");
   let navigationStarted = false;
   const navigationStartKey = "fileflow-navigation-start";
   const minimumLoaderDuration = 360;
@@ -98,6 +99,7 @@
 
   window.addEventListener("pageshow", () => {
     navigationStarted = false;
+    body.classList.remove("page-visible");
     body.classList.remove("page-leaving");
     body.removeAttribute("aria-busy");
 
@@ -111,6 +113,7 @@
       body.classList.remove("page-loading");
       loader.setAttribute("aria-hidden", "true");
       sessionStorage.removeItem(navigationStartKey);
+      requestAnimationFrame(() => body.classList.add("page-visible"));
     }, remaining);
   });
 })();
