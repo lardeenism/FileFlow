@@ -59,7 +59,7 @@ FileFlow/
 ├── README.md
 ├── fileflow/
 │   ├── __init__.py                # Flask application factory
-│   ├── db.py                      # Supabase PostgreSQL and MySQL adapters
+│   ├── db.py                      # Supabase PostgreSQL adapter
 │   ├── file_service.py            # Validation, hashing, categories, safe moves
 │   ├── processing.py              # Queue, workers, locks, shared runtime state
 │   ├── routes.py                  # Page and JSON API routes
@@ -155,7 +155,7 @@ The main application uses the PostgreSQL database provided by Supabase. On start
 
 Every Flask request and worker application context opens its own PostgreSQL connection; connections are never shared unsafely across worker threads. Indexed hashes, statuses, categories, and relationships support reporting and duplicate checks. Foreign keys cascade task deletion and safely clear duplicate references.
 
-FileFlow defaults to `DB_BACKEND=supabase` and reads the connection string from `SUPABASE_DB_URL`. The previous MySQL adapter remains available as a temporary rollback path but is no longer the default.
+FileFlow uses Supabase PostgreSQL exclusively and reads its connection string from `SUPABASE_DB_URL`.
 
 The Supabase schema enables Row Level Security without adding anonymous Data API policies. FileFlow connects from its trusted Flask backend using the database connection string; never expose that string in browser JavaScript.
 ## Security decisions

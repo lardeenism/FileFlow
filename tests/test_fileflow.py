@@ -28,7 +28,6 @@ class FileFlowTests(unittest.TestCase):
         self.runtime_root = root
         self.app = create_app({
             "TESTING": True,
-            "DB_BACKEND": "supabase",
             "SUPABASE_DB_URL": test_database_url,
             "STORAGE_ROOT": str(root / "storage"),
         })
@@ -121,7 +120,6 @@ class FileFlowTests(unittest.TestCase):
         cursor = connection.cursor.return_value.__enter__.return_value
         cursor.fetchone.return_value = {"id": 73}
         with self.app.app_context():
-            self.app.config["DB_BACKEND"] = "supabase"
             with patch("fileflow.db.get_db", return_value=connection):
                 inserted = db.execute(
                     "INSERT INTO files (original_filename, stored_filename, source_path, created_at) VALUES (?,?,?,?)",

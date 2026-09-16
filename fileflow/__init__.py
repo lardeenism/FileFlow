@@ -24,13 +24,7 @@ def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
         SECRET_KEY="fileflow-development-key",
-        DB_BACKEND=os.getenv("FILEFLOW_DB_BACKEND", "supabase"),
         SUPABASE_DB_URL=os.getenv("SUPABASE_DB_URL", ""),
-        MYSQL_HOST=os.getenv("FILEFLOW_MYSQL_HOST", "127.0.0.1"),
-        MYSQL_PORT=int(os.getenv("FILEFLOW_MYSQL_PORT", "3306")),
-        MYSQL_USER=os.getenv("FILEFLOW_MYSQL_USER", "root"),
-        MYSQL_PASSWORD=os.getenv("FILEFLOW_MYSQL_PASSWORD", ""),
-        MYSQL_DATABASE=os.getenv("FILEFLOW_MYSQL_DATABASE", "fileflow"),
         STORAGE_ROOT=str(Path(app.instance_path) / "storage"),
         MAX_UPLOAD_MB=max_upload_mb,
         MAX_UPLOAD_LABEL=max_upload_label,
