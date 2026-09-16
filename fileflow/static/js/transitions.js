@@ -25,7 +25,7 @@
     loader.setAttribute("aria-hidden", "false");
     body.classList.add("page-leaving");
     body.setAttribute("aria-busy", "true");
-    window.setTimeout(() => window.location.assign(destination), reducedMotion ? 0 : 460);
+    window.setTimeout(() => window.location.assign(destination), reducedMotion ? 0 : 180);
   }
 
   window.FileFlowNavigation = {navigate};

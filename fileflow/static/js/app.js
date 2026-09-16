@@ -159,7 +159,8 @@ async function startAction(kind, source, taskIds = null) {
     toast(result.message, "success", kind === "demo" ? "Demo started" : "Workers started");
     if (kind === "process" && page !== "threads") {
       sessionStorage.setItem("fileflow-monitor-message", result.message);
-      window.location.assign("/threads");
+      if (window.FileFlowNavigation) window.FileFlowNavigation.navigate("/threads");
+      else window.location.assign("/threads");
       return;
     }
     pollPageData();
@@ -483,7 +484,12 @@ $("#clearFileFilters")?.addEventListener("click", () => {
 });
 $$('#logFilters button').forEach(button => button.addEventListener("click", () => { $$('#logFilters button').forEach(b=>{b.classList.remove("active");b.setAttribute("aria-pressed","false");}); button.classList.add("active"); button.setAttribute("aria-pressed","true"); logLevel=button.dataset.level; loadLogs(); }));
 
-initUploads(); initSettings(); initHistoryExport(); initReportActions(); initConcurrencyQuiz(); pollPageData(); pollStatus();
+initUploads(); initSettings(); initHistoryExport(); initReportActions(); initConcurrencyQuiz();
+if ($("#heroWorkerOrbit")) {
+  const initialWorkerCount = Number($("#sidebarWorkers")?.textContent || 5);
+  renderEngineWorkers(Array.from({length: initialWorkerCount}, () => ({})));
+}
+pollPageData(); pollStatus();
 const monitorMessage = sessionStorage.getItem("fileflow-monitor-message");
 if (monitorMessage && page === "threads") {
   sessionStorage.removeItem("fileflow-monitor-message");
