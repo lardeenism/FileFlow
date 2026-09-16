@@ -21,7 +21,13 @@
     </div>`;
   body.append(loader);
 
-  const pendingNavigationStartedAt = Number(sessionStorage.getItem(navigationStartKey) || 0);
+  const navigationEntry = performance.getEntriesByType?.("navigation")[0];
+  const isPageReload = navigationEntry?.type === "reload";
+  let pendingNavigationStartedAt = Number(sessionStorage.getItem(navigationStartKey) || 0);
+  if (!reducedMotion && isPageReload && !pendingNavigationStartedAt) {
+    pendingNavigationStartedAt = Date.now();
+    sessionStorage.setItem(navigationStartKey, String(pendingNavigationStartedAt));
+  }
   if (!reducedMotion && pendingNavigationStartedAt && Date.now() - pendingNavigationStartedAt < minimumLoaderDuration) {
     body.classList.add("page-loading");
     loader.setAttribute("aria-hidden", "false");
