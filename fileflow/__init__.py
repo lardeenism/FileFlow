@@ -23,9 +23,11 @@ def create_app(test_config=None):
     max_upload_label = f"{max_upload_mb // 1024:g} GB" if max_upload_mb % 1024 == 0 else f"{max_upload_mb} MB"
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_mapping(
-        SECRET_KEY="fileflow-development-key",
+        SECRET_KEY=os.getenv("FILEFLOW_SECRET_KEY", "fileflow-development-key"),
         SUPABASE_DB_URL=os.getenv("SUPABASE_DB_URL", ""),
-        STORAGE_ROOT=str(Path(app.instance_path) / "storage"),
+        STORAGE_ROOT=os.getenv(
+            "FILEFLOW_STORAGE_ROOT", str(Path(app.instance_path) / "storage")
+        ),
         MAX_UPLOAD_MB=max_upload_mb,
         MAX_UPLOAD_LABEL=max_upload_label,
         MAX_CONTENT_LENGTH=max_upload_mb * 1024 * 1024,

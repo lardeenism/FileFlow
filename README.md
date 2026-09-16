@@ -195,6 +195,19 @@ Use the exact connection string supplied by the dashboard; do not construct the 
 
 The application creates the tables automatically. Alternatively, paste `database/fileflow_supabase.sql` into the Supabase SQL Editor. Open <http://127.0.0.1:5000> after starting FileFlow.
 
+## Deploying to Render
+
+This repository includes a `render.yaml` Blueprint for a Render web service.
+
+1. Push the repository to GitHub.
+2. In Render, choose **New > Blueprint** and select the repository.
+3. Enter `SUPABASE_DB_URL` when prompted. Use the PostgreSQL Session pooler URI from Supabase's **Connect** panel, not the REST API URL.
+4. Apply the Blueprint and wait for the health check to pass.
+
+The Blueprint runs `gunicorn` with one process and multiple request threads. Keeping one process is important because FileFlow's live processing monitor is held in process memory.
+
+The free Render plan has an ephemeral filesystem, so uploaded and organized files are lost when the service restarts, spins down, or redeploys. PostgreSQL metadata remains in Supabase, but its stored local file paths then become stale. For durable uploads, change the service to a paid plan, attach a persistent disk at `/var/data/fileflow`, and set `FILEFLOW_STORAGE_ROOT=/var/data/fileflow`. A service with a persistent disk must remain a single instance.
+
 ## Supabase troubleshooting
 
 - Confirm `SUPABASE_DB_URL` is set in the same terminal used to run `python app.py`.
