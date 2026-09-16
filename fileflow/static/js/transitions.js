@@ -4,6 +4,8 @@
   const body = document.body;
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   let navigationStarted = false;
+  const navigationStartKey = "fileflow-navigation-start";
+  const minimumLoaderDuration = 360;
 
   const loader = document.createElement("div");
   loader.className = "navigation-loader";
@@ -19,13 +21,20 @@
     </div>`;
   body.append(loader);
 
+  const pendingNavigationStartedAt = Number(sessionStorage.getItem(navigationStartKey) || 0);
+  if (!reducedMotion && pendingNavigationStartedAt && Date.now() - pendingNavigationStartedAt < minimumLoaderDuration) {
+    body.classList.add("page-loading");
+    loader.setAttribute("aria-hidden", "false");
+  }
+
   function navigate(destination) {
     if (navigationStarted) return;
     navigationStarted = true;
+    sessionStorage.setItem(navigationStartKey, String(Date.now()));
     loader.setAttribute("aria-hidden", "false");
     body.classList.add("page-leaving");
     body.setAttribute("aria-busy", "true");
-    window.setTimeout(() => window.location.assign(destination), reducedMotion ? 0 : 60);
+    window.setTimeout(() => window.location.assign(destination), reducedMotion ? 0 : 40);
   }
 
   window.FileFlowNavigation = {navigate};
@@ -85,6 +94,17 @@
     navigationStarted = false;
     body.classList.remove("page-leaving");
     body.removeAttribute("aria-busy");
-    loader.setAttribute("aria-hidden", "true");
+
+    const startedAt = Number(sessionStorage.getItem(navigationStartKey) || 0);
+    const remaining = reducedMotion ? 0 : Math.max(0, minimumLoaderDuration - (Date.now() - startedAt));
+    if (startedAt && remaining > 0) {
+      body.classList.add("page-loading");
+      loader.setAttribute("aria-hidden", "false");
+    }
+    window.setTimeout(() => {
+      body.classList.remove("page-loading");
+      loader.setAttribute("aria-hidden", "true");
+      sessionStorage.removeItem(navigationStartKey);
+    }, remaining);
   });
 })();
