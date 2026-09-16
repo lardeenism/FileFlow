@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="page-content">
+  <section class="workflow-guide glass" aria-label="FileFlow processing workflow">
+    <div class="workflow-copy">
+      <span class="section-tag">HOW FILEFLOW WORKS</span>
+      {% if page == 'dashboard' %}<strong>Start here</strong><small>Upload → queue → real worker threads → organized results.</small>
+      {% elif page == 'files' %}<strong>Upload and storage</strong><small>New files wait safely in Incoming; completed files move into category folders.</small>
+      {% elif page == 'queue' %}<strong>Choose what runs</strong><small>Run one pending file or dispatch the full queue to the shared worker pool.</small>
+      {% elif page == 'threads' %}<strong>Watch real processing</strong><small>Each card represents one Python thread and its currently assigned file.</small>
+      {% elif page == 'history' %}<strong>Verify completed work</strong><small>Review the worker, thread ID, duration, category, and completion time.</small>
+      {% elif page == 'logs' %}<strong>Explain the concurrency</strong><small>Queue, worker, Lock, and join events provide evidence of the real runtime.</small>
+      {% elif page == 'reports' %}<strong>Measure durable results</strong><small>Review database-backed storage, category, worker, and duration metrics.</small>
+      {% elif page == 'settings' %}<strong>Configure the worker pool</strong><small>The selected worker count applies to the next processing batch.</small>
+      {% elif page == 'about' %}<strong>Explore the concepts</strong><small>Connect FileFlow's implementation to operating-system concurrency.</small>{% endif %}
+    </div>
+    <nav class="workflow-steps" aria-label="Core workflow steps">
+      <a href="/files" class="{% if page == 'files' %}active{% endif %}"><b>1</b><span><small>ADD</small>Files</span></a><i>→</i>
+      <a href="/queue" class="{% if page == 'queue' %}active{% endif %}"><b>2</b><span><small>WAIT</small>Queue</span></a><i>→</i>
+      <a href="/threads" class="{% if page == 'threads' %}active{% endif %}"><b>3</b><span><small>RUN</small>Workers</span></a><i>→</i>
+      <a href="/history" class="{% if page == 'history' %}active{% endif %}"><b>4</b><span><small>VERIFY</small>History</span></a>
+    </nav>
+  </section>
+{% if page == 'dashboard' %}
+  <section class="hero-card glass">
+    <div>
+      <div class="hero-kicker"><span class="pulse-dot"></span> CONCURRENT ENGINE ONLINE</div>
+      <h2>Organize files at the<br><em>speed of threads.</em></h2>
+      <p>Queue files, watch five real Python workers process them concurrently, and inspect every synchronization event.</p>
+      <div class="hero-actions">
+        <label class="button button-primary" for="dashboardUpload">＋ Add files</label>
+        <input type="file" id="dashboardUpload" class="sr-only" multiple>
+        <button class="button button-ghost" data-action="process">Run pending queue →</button>
+      </div>
+    </div>
+    <div class="engine-visual" aria-hidden="true">
+      <div class="queue-node"><small>QUEUE</small><strong id="heroQueue">0</strong><span>tasks</span></div>
+      <div class="flow-lines" id="heroFlowLines"></div>
+      <div class="worker-orbit" id="heroWorkerOrbit">
+        <div class="orbit-core">PY<br><small>THREADS</small></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="stats-grid" id="statsGrid">
+    <article class="stat-card glass"><span class="stat-icon blue">◫</span><div><small>Total Files</small><strong data-stat="total">0</strong><p>all uploaded items</p></div></article>
+    <article class="stat-card glass"><span class="stat-icon green">✓</span><div><small>Processed</small><strong data-stat="processed">0</strong><p>organized successfully</p></div></article>
+    <article class="stat-card glass"><span class="stat-icon amber">◷</span><div><small>Pending</small><strong data-stat="pending">0</strong><p>waiting in queue</p></div></article>
+    <article class="stat-card glass"><span class="stat-icon cyan">⌘</span><div><small>Active Workers</small><strong data-stat="active_workers">0</strong><p>real Python threads</p></div></article>
+    <article class="stat-card glass"><span class="stat-icon red">!</span><div><small>Failed</small><strong data-stat="failed">0</strong><p>need attention</p></div></article>
+    <article class="stat-card glass"><span class="stat-icon violet">⧉</span><div><small>Duplicates</small><strong data-stat="duplicates">0</strong><p>SHA-256 matches</p></div></article>
+  </section>
+
+  <section class="dashboard-grid">
+    <article class="panel glass span-two">
+      <div class="panel-head"><div><span class="section-tag">RUNTIME</span><h3>Worker progress</h3></div><a href="/threads">Open monitor →</a></div>
+      <div class="compact-workers" id="dashboardWorkers"><div class="empty-state">Waiting for runtime data…</div></div>
+    </article>
+    <article class="panel glass">
+      <div class="panel-head"><div><span class="section-tag">ACTIVITY</span><h3>Recent events</h3></div><a href="/history">View all</a></div>
+      <div class="activity-list" id="recentActivity"><div class="empty-state">No activity yet.</div></div>
+    </article>
+    <article class="panel glass span-three terminal-panel">
+      <div class="panel-head"><div><span class="section-tag">STDOUT</span><h3>Processing logs</h3></div><div class="terminal-dots"><i></i><i></i><i></i></div></div>
+      <div class="mini-terminal" id="dashboardLogs"><p class="muted">$ FileFlow is ready. Upload files or start the demo.</p></div>
+    </article>
+  </section>
+
+{% elif page == 'files' %}
+  <section class="upload-zone glass" id="dropZone">
+    <input type="file" id="fileInput" multiple hidden>
+    <div class="upload-icon">⇧</div><h2>Drop files into the processing pipeline</h2>
+    <p>or <button class="text-button" id="browseButton">browse your computer</button> · up to {{ config.MAX_UPLOAD_LABEL }} per request</p>
+    <div class="upload-feedback" id="uploadFeedback" hidden><div><span id="uploadFeedbackText">Preparing upload…</span><b id="uploadFeedbackPercent">0%</b></div><div class="progress-track"><i id="uploadFeedbackBar"></i></div></div>
+    <div class="type-chips"><span>Images</span><span>Documents</span><span>Sheets</span><span>Video</span><span>Audio</span><span>Archives</span></div>
+  </section>
+  <section class="storage-explainer" aria-label="File storage lifecycle"><div><b>1</b><span><small>BEFORE PROCESSING</small>Incoming storage</span></div><i>→</i><div><b>2</b><span><small>WORKER ACTION</small>Hash + categorize</span></div><i>→</i><div><b>3</b><span><small>AFTER PROCESSING</small>Organized category folder</span></div></section>
+  <section class="panel glass table-panel">
+    <div class="panel-head"><div><span class="section-tag">STORAGE</span><h3>File library</h3><small class="section-summary" id="fileResultsCount">Loading files…</small></div><div class="panel-actions file-filters">
+      <input class="search-input" id="fileSearch" placeholder="Search files…" aria-label="Search files">
+      <select class="filter-select" id="categoryFilter" aria-label="Filter by category">
+        <option value="all">All categories</option><option>Images</option><option>Documents</option><option>Spreadsheets</option><option>Presentations</option><option>Videos</option><option>Audio</option><option>Archives</option><option>Others</option><option>Duplicates</option>
+      </select>
+      <select class="filter-select" id="statusFilter" aria-label="Filter by status">
+        <option value="all">All statuses</option><option value="pending">Pending</option><option value="processing">Processing</option><option value="completed">Completed</option><option value="failed">Failed</option>
+      </select>
+      <button class="filter-clear" id="clearFileFilters" type="button">Clear</button>
+      <button class="button button-primary button-small" data-action="process">Process pending</button>
+    </div></div>
+    <div class="folder-summary" id="folderSummary" aria-label="Organized folder counts"></div>
+    <div class="table-wrap"><table><thead><tr><th>File</th><th>Category</th><th>Size</th><th>SHA-256</th><th>Status</th><th>Worker / Thread</th><th></th></tr></thead><tbody id="filesTable"></tbody></table></div>
+  </section>
+
+{% elif page == 'queue' %}
+  <section class="queue-overview">
+    <article class="panel glass queue-main">
+      <div class="panel-head"><div><span class="section-tag">FIFO TASK QUEUE</span><h3>Live processing queue</h3><small class="section-summary" id="taskResultsCount">Loading tasks…</small></div><button class="button button-primary" data-action="process">▶ Run pending queue</button></div>
+      <div class="queue-flow"><div><small>ENQUEUED</small><strong id="queuePending">0</strong></div><span>→</span><div><small>IN FLIGHT</small><strong id="queueActive">0</strong></div><span>→</span><div><small>COMPLETED</small><strong id="queueCompleted">0</strong></div></div>
+      <div class="table-wrap"><table><thead><tr><th>Task</th><th>File</th><th>Worker</th><th>Progress</th><th>Status</th><th>Queued</th><th></th></tr></thead><tbody id="tasksTable"></tbody></table></div>
+    </article>
+    <aside class="panel glass concept-card"><span class="section-tag">CONCEPT</span><h3>queue.Queue</h3><pre><code>tasks = queue.Queue()
+tasks.put(file)
+
+item = tasks.get()
+process(item)
+tasks.task_done()
+
+tasks.join()</code></pre><p>A thread-safe FIFO structure distributes each task to exactly one available worker.</p></aside>
+  </section>
+
+{% elif page == 'threads' %}
+  <section class="monitor-console glass">
+    <div class="monitor-banner"><div class="monitor-title"><div class="monitor-title-row"><span class="pulse-dot"></span><strong id="monitorHeadline">Thread pool ready</strong><span class="monitor-freshness" id="monitorFreshness">Connecting…</span></div><p id="monitorSubline">Checking for queued files…</p></div><div class="monitor-actions"><label class="button button-ghost" for="monitorUpload">＋ Add files</label><input type="file" id="monitorUpload" class="sr-only" multiple><button class="button button-primary" data-action="process">▶ Run pending queue</button></div></div>
+    <div class="batch-empty" id="batchEmpty"><span>◷</span><div><strong>No batch results yet</strong><small>Upload files, then run one file or the pending queue. Live totals will appear here.</small></div></div>
+    <div class="monitor-overall" id="batchMetrics" aria-label="Current batch progress" hidden>
+      <div class="batch-heading"><small>CURRENT BATCH</small><strong id="batchContext">Waiting to start</strong></div>
+      <div class="batch-summary">
+        <span><small>TOTAL</small><b id="batchTotal">0</b></span><span><small>COMPLETED</small><b id="batchCompleted">0</b></span><span><small>RUNNING</small><b id="batchRunning">0</b></span><span><small>WAITING</small><b id="batchPending">0</b></span><span><small>FAILED</small><b id="batchFailed">0</b></span>
+      </div>
+      <div class="overall-progress"><div><small>BATCH PROGRESS</small><b id="batchProgressLabel">0%</b></div><div class="progress-track" role="progressbar" aria-label="Batch progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="batchProgressBar"></i></div></div>
+    </div>
+  </section>
+  <section class="worker-pool-section">
+    <div class="worker-pool-head"><div><span class="section-tag">REAL PYTHON THREADS</span><h2>Worker pool</h2></div><span id="workerPoolSummary">Loading configured workers…</span></div>
+    <div class="status-legend" aria-label="Worker status meanings"><span class="idle"><i></i><b>IDLE</b> available for work</span><span class="running"><i></i><b>RUNNING</b> processing a file now</span><span class="completed"><i></i><b>COMPLETED</b> finished its last file</span><span class="failed"><i></i><b>FAILED</b> last task needs attention</span></div>
+    <section class="thread-grid" id="threadGrid"></section>
+  </section>
+  <section class="monitor-detail-grid">
+    <article class="panel glass">
+      <div class="panel-head"><div><span class="section-tag">PROCESSING QUEUE</span><h3>Pending files</h3></div><small class="panel-note">Run one file or start the full queue above</small></div>
+      <div class="table-wrap"><table><thead><tr><th>Task</th><th>File</th><th>Status</th><th>Queued</th><th></th></tr></thead><tbody id="monitorPendingTasks"><tr><td colspan="5"><div class="empty-state">Loading queued files…</div></td></tr></tbody></table></div>
+    </article>
+    <article class="panel glass">
+      <div class="panel-head"><div><span class="section-tag">LIVE RESULTS</span><h3>Recent worker activity</h3></div><small class="panel-note">Finish order · first completed appears first</small></div>
+      <div class="finish-order" id="completionOrder"><div class="empty-state">Worker completions will appear here in real time.</div></div>
+    </article>
+  </section>
+  <section class="concept-grid">
+    <article class="panel glass"><span class="concept-number">01</span><h3>Real worker threads</h3><p>Every card maps to a live <code>threading.Thread</code>. The native identifier comes from <code>threading.get_native_id()</code>, never from UI mock data.</p></article>
+    <article class="panel glass"><span class="concept-number">02</span><h3>Synchronized state</h3><p>A <code>threading.RLock</code> protects live telemetry. A short separate <code>Lock</code> protects duplicate metadata while slow file I/O stays outside it.</p></article>
+    <article class="panel glass"><span class="concept-number">03</span><h3>Clean completion</h3><p>The coordinator calls <code>Queue.join()</code>, then <code>Thread.join()</code> for every worker before announcing batch completion.</p></article>
+  </section>
+
+{% elif page == 'history' %}
+  <section class="panel glass table-panel">
+    <div class="panel-head"><div><span class="section-tag">AUDIT TRAIL</span><h3>Completed processing tasks</h3><small class="section-summary" id="historyResultsCount">Loading history…</small></div><button class="button button-ghost button-small" id="exportHistory">Export CSV</button></div>
+    <div class="table-wrap"><table><thead><tr><th>File</th><th>Result</th><th>Category</th><th>Worker</th><th>Thread ID</th><th>Duration</th><th>SHA-256</th><th>Completed</th></tr></thead><tbody id="historyTable"></tbody></table></div>
+  </section>
+
+{% elif page == 'logs' %}
+  <section class="panel glass terminal-full">
+    <div class="terminal-toolbar"><div class="terminal-title"><div class="terminal-dots"><i></i><i></i><i></i></div><div><strong>fileflow.runtime.log</strong><small id="logResultsCount">Connecting…</small></div></div><div class="log-filters" id="logFilters"><button class="active" data-level="all" aria-pressed="true">All</button><button data-level="info" aria-pressed="false">Info</button><button data-level="success" aria-pressed="false">Success</button><button data-level="warning" aria-pressed="false">Lock / Race</button><button data-level="error" aria-pressed="false">Errors</button></div></div>
+    <div class="log-terminal" id="logTerminal"><p class="muted">Connecting to processing log…</p></div>
+  </section>
+
+{% elif page == 'reports' %}
+  <section class="report-toolbar panel glass">
+    <div><span class="section-tag">MYSQL-BACKED SNAPSHOT</span><h3>Operational summary</h3><small id="reportGenerated">Loading report...</small></div>
+    <div class="panel-actions"><button class="button button-ghost button-small" id="printReport" type="button">Print / PDF</button><button class="button button-primary button-small" id="exportReport" type="button" disabled>Export CSV</button></div>
+  </section>
+  <section class="stats-grid report-stats">
+    <article class="stat-card glass"><span class="stat-icon blue">#</span><div><small>Completed Files</small><strong id="reportCompleted">0</strong><p>successfully processed</p></div></article>
+    <article class="stat-card glass"><span class="stat-icon cyan">MB</span><div><small>Processed Data</small><strong id="reportBytes">0 B</strong><p>completed file bytes</p></div></article>
+    <article class="stat-card glass"><span class="stat-icon violet">%</span><div><small>Duplicate Ratio</small><strong id="reportDuplicates">0%</strong><p>of all uploaded files</p></div></article>
+    <article class="stat-card glass"><span class="stat-icon amber">s</span><div><small>Average Duration</small><strong id="reportDuration">0s</strong><p>persisted task timestamps</p></div></article>
+    <article class="stat-card glass"><span class="stat-icon red">!</span><div><small>Failed Files</small><strong id="reportFailed">0</strong><p>need attention</p></div></article>
+    <article class="stat-card glass"><span class="stat-icon green">+</span><div><small>All Uploads</small><strong id="reportTotal">0</strong><p>including queued files</p></div></article>
+  </section>
+  <section class="report-grid">
+    <article class="panel glass"><div class="panel-head"><div><span class="section-tag">COMPLETED STORAGE</span><h3>Category distribution</h3></div></div><div class="report-bars" id="categoryReport"><div class="empty-state">Loading categories...</div></div></article>
+    <article class="panel glass"><div class="panel-head"><div><span class="section-tag">HISTORICAL TASKS</span><h3>Worker distribution</h3></div></div><p class="report-disclaimer" id="reportScope">Worker numbers are reusable pool labels. These bars show persisted tasks, not CPU utilization.</p><div class="report-bars" id="workerReport"><div class="empty-state">Loading workers...</div></div></article>
+  </section>
+
+{% elif page == 'about' %}
+  <section class="about-hero glass"><span class="section-tag">MASTER CONCURRENCY</span><h2>Unlock hardware potential safely.</h2><p>FileFlow is an I/O-bound teaching system built with a shared queue, native Python worker threads, explicit synchronization, Supabase PostgreSQL, and confined file storage.</p></section>
+  <section class="concept-grid concurrency-checklist">
+    <article class="panel glass"><span class="concept-number">01</span><h3>Shared memory</h3><p>Threads in one process share application state. FileFlow protects live worker telemetry with an <code>RLock</code>.</p></article>
+    <article class="panel glass"><span class="concept-number">02</span><h3>Native threads</h3><p><code>threading.Thread</code> maps to native threads in CPython. FileFlow records each worker's <code>get_native_id()</code> value.</p></article>
+    <article class="panel glass"><span class="concept-number">03</span><h3>Synchronization</h3><p>A dedicated <code>Lock</code> serializes duplicate decisions and destination reservation for shared mutable data.</p></article>
+    <article class="panel glass"><span class="concept-number">04</span><h3>I/O concurrency</h3><p>Disk reads, file movement, and database requests spend time waiting, allowing worker threads to overlap despite the GIL.</p></article>
+  </section>
+  <section class="about-grid">
+    <article class="panel glass quiz-panel"><span class="section-tag">CONCEPT CHECK</span><h3>Concurrency quiz</h3>
+      <form id="concurrencyQuiz">
+        <fieldset data-answer="thread"><legend>1. Which context switch is generally lighter within one application?</legend><label><input type="radio" name="switch" value="process"> Process switch</label><label><input type="radio" name="switch" value="thread"> Thread switch</label><p class="quiz-feedback" aria-live="polite"></p></fieldset>
+        <fieldset data-answer="race"><legend>2. Two threads update shared data without synchronization and the result depends on timing. What is this?</legend><label><input type="radio" name="hazard" value="deadlock"> Deadlock</label><label><input type="radio" name="hazard" value="race"> Data race</label><p class="quiz-feedback" aria-live="polite"></p></fieldset>
+        <button class="button button-primary" type="submit">Check answers</button>
+      </form>
+    </article>
+    <article class="panel glass context-panel"><span class="section-tag">CONTEXT SWITCH</span><h3>Thread versus process</h3><div class="switch-comparison"><div><b>THREAD</b><span>Registers</span><span>Stack pointer</span><span>Program counter</span><small>Usually retains the process address-space context.</small></div><div><b>PROCESS</b><span>Registers</span><span>Address-space context</span><span>Memory/cache effects</span><small>May require additional mapping and translation work; modern CPUs can preserve some TLB entries.</small></div></div></article>
+    <article class="panel glass architecture-card span-two"><span class="section-tag">SYSTEM ARCHITECTURE</span><h3>From browser to organized storage</h3><div class="architecture-flow"><span>Vanilla UI</span><i>-</i><span>Flask Routes</span><i>-</i><span>FIFO Queue</span><i>-</i><span>Native Workers</span><i>-</i><span>Locks</span><i>-</i><span>Supabase PostgreSQL + Storage</span></div></article>
+  </section>
+
+{% elif page == 'settings' %}
+  <section class="settings-grid">
+    <article class="panel glass setting-card">
+      <div class="setting-icon">⌘</div><div><span class="section-tag">THREAD POOL</span><h3>Worker configuration</h3><p>Choose how many real Python threads standard batches use. Demo Mode always uses exactly five.</p>
+      <form id="settingsForm"><label for="workerCount">Concurrent workers <output id="workerOutput">5</output></label><input type="range" min="1" max="12" value="5" id="workerCount"><div class="range-labels"><span>1</span><span>5 default</span><span>12</span></div><button class="button button-primary" type="submit">Save configuration</button></form></div>
+    </article>
+    <article class="panel glass setting-card sync-card">
+      <div class="setting-icon amber">⇄</div><div><span class="section-tag">EDUCATIONAL LAB</span><h3>Safe vs Unsafe synchronization</h3><p>Run real threads against shared mutable counters. The unsafe experiment coordinates stale reads to expose lost updates; the safe one uses <code>Lock</code>.</p><button class="button button-ghost" id="syncDemo">Run race condition demo</button><div class="sync-results" id="syncResults"></div></div>
+    </article>
+    <article class="panel glass safety-card"><span class="section-tag">UPLOAD SAFETY</span><h3>Guardrails enabled</h3><ul><li><b>✓</b> secure filename normalization</li><li><b>✓</b> storage-root path confinement</li><li><b>✓</b> collision-free output names</li><li><b>✓</b> executable extension blocklist</li><li><b>✓</b> {{ config.MAX_UPLOAD_LABEL }} request limit</li></ul></article>
+    <article class="panel glass architecture-card"><span class="section-tag">SYSTEM ARCHITECTURE</span><h3>Layered and modular</h3><div class="architecture-flow"><span>Presentation</span><i>↓</i><span>Flask Routes</span><i>↓</i><span>Service Layer</span><i>↓</i><span>Processing Manager</span><i>↓</i><span>Workers</span><i>↓</i><span>Supabase PostgreSQL + Storage</span></div></article>
+  </section>
+{% endif %}
+</section>
+{% endblock %}

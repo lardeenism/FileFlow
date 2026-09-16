@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="FileFlow organizes files concurrently using real Python worker threads.">
+  <title>FileFlow · Concurrent File Processing</title>
+  <link rel="icon" type="image/x-icon" sizes="any" href="{{ url_for('static', filename='favicon.ico', v=1) }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css', v=9) }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css', v=6) }}">
+</head>
+<body class="landing-page" data-page="landing">
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <header class="landing-nav">
+    <a class="brand" href="/" aria-label="FileFlow home">
+      <span class="brand-mark"><i></i><i></i><i></i></span>
+      <span><strong>FileFlow</strong><small>CONCURRENCY LAB</small></span>
+    </a>
+    <nav aria-label="Landing page navigation">
+      <a href="#features">Features</a><a href="#workflow">Workflow</a><a href="#architecture">Architecture</a>
+    </nav>
+    <div class="landing-actions">
+      <button class="theme-toggle landing-theme" id="landingTheme" type="button" aria-label="Switch to light mode"><span aria-hidden="true">☀</span></button>
+      <a class="button button-ghost" href="/dashboard">Open dashboard</a>
+    </div>
+  </header>
+
+  <main class="landing-main">
+    <section class="landing-hero">
+      <div class="landing-copy">
+        <div class="landing-badge"><span class="pulse-dot"></span> REAL PYTHON MULTITHREADING</div>
+        <h1>File organization,<br><em>running concurrently.</em></h1>
+        <p>Upload a batch. Watch real worker threads hash, categorize, detect duplicates, and organize every file—with the entire pipeline visible in real time.</p>
+        <div class="landing-cta">
+          <a class="button button-primary landing-primary" href="/dashboard">Enter FileFlow <span>→</span></a>
+          <button class="button button-demo landing-demo" id="landingDemo"><span>▶</span> Run 5-thread demo</button>
+        </div>
+        <div class="landing-notice" id="landingNotice" role="status" aria-live="polite"></div>
+        <div class="tech-list"><span>threading.Thread</span><span>queue.Queue</span><span>threading.Lock</span><span>PostgreSQL</span></div>
+      </div>
+
+      <div class="landing-runtime glass" aria-label="Concurrent processing visualization">
+        <div class="runtime-head"><div><span class="pulse-dot"></span><strong>PROCESSING RUNTIME</strong></div><small>LIVE ARCHITECTURE</small></div>
+        <div class="runtime-queue"><span>01</span><div><small>TASK QUEUE</small><strong>Files waiting</strong></div><b>9</b></div>
+        <div class="runtime-connector"><i></i><span>thread-safe dispatch</span><i></i></div>
+        <div class="runtime-workers">
+          <article><span>W1</span><div><strong>report.pdf</strong><i><b style="width:88%"></b></i></div><small>88%</small></article>
+          <article><span>W2</span><div><strong>photo.png</strong><i><b style="width:64%"></b></i></div><small>64%</small></article>
+          <article><span>W3</span><div><strong>records.csv</strong><i><b style="width:42%"></b></i></div><small>42%</small></article>
+          <article><span>W4</span><div><strong>backup.zip</strong><i><b style="width:75%"></b></i></div><small>75%</small></article>
+          <article><span>W5</span><div><strong>audio.mp3</strong><i><b style="width:27%"></b></i></div><small>27%</small></article>
+        </div>
+        <div class="runtime-foot"><span><i></i> 5 workers active</span><code>LOCK: synchronized</code></div>
+      </div>
+    </section>
+
+    <section class="landing-metrics" aria-label="Project highlights">
+      <div><strong>5</strong><span>default worker threads</span></div>
+      <div><strong>SHA-256</strong><span>duplicate detection</span></div>
+      <div><strong>9</strong><span>organized folders</span></div>
+      <div><strong>100%</strong><span>observable pipeline</span></div>
+    </section>
+
+    <section class="landing-section" id="features">
+      <div class="landing-section-head"><span class="section-tag">BUILT FOR CONCURRENCY</span><h2>More than a file manager.</h2><p>FileFlow turns operating-system concepts into a working, inspectable application.</p></div>
+      <div class="landing-feature-grid">
+        <article class="glass"><span class="feature-glyph cyan">⌘</span><h3>Real worker threads</h3><p>Actual Python threads perform simultaneous I/O and expose their native operating-system identifiers.</p><code>threading.get_native_id()</code></article>
+        <article class="glass"><span class="feature-glyph blue">≋</span><h3>Thread-safe queue</h3><p>A synchronized FIFO queue distributes every task to exactly one available worker.</p><code>queue.Queue()</code></article>
+        <article class="glass"><span class="feature-glyph amber">◆</span><h3>Atomic organization</h3><p>A Lock protects duplicate decisions and file movement from race conditions.</p><code>with organization_lock:</code></article>
+        <article class="glass"><span class="feature-glyph green">#</span><h3>SHA-256 detection</h3><p>Content hashes identify identical files even when their filenames are different.</p><code>hashlib.sha256()</code></article>
+        <article class="glass"><span class="feature-glyph violet">▦</span><h3>Supabase PostgreSQL</h3><p>Files, tasks, settings, worker assignments, and logs persist securely in a cloud database.</p><code>PostgreSQL + SSL</code></article>
+        <article class="glass"><span class="feature-glyph red">›_</span><h3>Live observability</h3><p>Monitor queue activity, progress, errors, Lock events, and batch completion.</p><code>Queue.join() + join()</code></article>
+      </div>
+    </section>
+
+    <section class="landing-section workflow-section" id="workflow">
+      <div class="landing-section-head"><span class="section-tag">HOW IT WORKS</span><h2>From upload to organized.</h2></div>
+      <div class="landing-workflow">
+        <article><b>01</b><span>⇧</span><h3>Upload</h3><p>Files are validated, renamed safely, and staged.</p></article><i>→</i>
+        <article><b>02</b><span>≋</span><h3>Queue</h3><p>Each database task enters the synchronized FIFO queue.</p></article><i>→</i>
+        <article><b>03</b><span>⌘</span><h3>Process</h3><p>Workers hash and categorize files concurrently.</p></article><i>→</i>
+        <article><b>04</b><span>◆</span><h3>Synchronize</h3><p>Lock protects duplicate detection and movement.</p></article><i>→</i>
+        <article><b>05</b><span>✓</span><h3>Organize</h3><p>Results, history, and logs persist automatically.</p></article>
+      </div>
+    </section>
+
+    <section class="landing-section architecture-section" id="architecture">
+      <div class="architecture-copy"><span class="section-tag">LAYERED ARCHITECTURE</span><h2>Modular by design.<br><em>Observable by default.</em></h2><p>Each layer has one clear responsibility, keeping the code beginner-friendly and presentation-ready.</p><a href="/settings" class="button button-ghost">Explore system concepts →</a></div>
+      <div class="landing-layers glass"><span>HTML · CSS · JavaScript <small>PRESENTATION</small></span><i>↓</i><span>Flask Routes <small>CONTROLLER</small></span><i>↓</i><span>File Services <small>BUSINESS LOGIC</small></span><i>↓</i><span>Processing Manager <small>CONCURRENCY</small></span><i>↓</i><span>Supabase + File System <small>PERSISTENCE</small></span></div>
+    </section>
+
+    <section class="landing-final glass">
+      <span class="section-tag">READY TO PROCESS</span><h2>See concurrency in motion.</h2><p>Open the dashboard, upload your files, and watch the worker pool run.</p><a class="button button-primary landing-primary" href="/dashboard">Launch dashboard →</a>
+    </section>
+  </main>
+
+  <footer class="landing-footer"><a class="brand" href="/"><span class="brand-mark"><i></i><i></i><i></i></span><span><strong>FileFlow</strong><small>CONCURRENCY LAB</small></span></a><p>Computer Science · Concurrent File Processing & Organizer System</p><small>Python · Flask · Supabase PostgreSQL · Vanilla JavaScript</small></footer>
+  <script src="{{ url_for('static', filename='js/transitions.js', v=3) }}" defer></script>
+  <script src="{{ url_for('static', filename='js/landing.js', v=5) }}" defer></script>
+</body>
+</html>

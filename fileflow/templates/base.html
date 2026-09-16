@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="FileFlow concurrent file processing and organizer system">
+  <title>{{ page_title }} · FileFlow</title>
+  <link rel="icon" type="image/x-icon" sizes="any" href="{{ url_for('static', filename='favicon.ico', v=1) }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css', v=17) }}">
+</head>
+<body data-page="{{ page }}" data-max-upload-bytes="{{ config.MAX_CONTENT_LENGTH }}" data-max-upload-label="{{ config.MAX_UPLOAD_LABEL }}">
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <aside class="sidebar" id="sidebar">
+    <button class="sidebar-collapse" id="sidebarCollapse" type="button" aria-label="Collapse sidebar" title="Collapse sidebar"><span aria-hidden="true">‹</span></button>
+    <a class="brand" href="{{ url_for('main.landing') }}" aria-label="Back to FileFlow landing page" title="Back to landing page">
+      <span class="brand-mark"><i></i><i></i><i></i></span>
+      <span><strong>FileFlow</strong><small>CONCURRENCY LAB</small></span>
+    </a>
+    <nav class="nav-list" aria-label="Main navigation">
+      <p class="nav-label">Workspace</p>
+      <a href="/dashboard" class="nav-item {% if page == 'dashboard' %}active{% endif %}"><span>⌂</span>Dashboard</a>
+      <a href="/files" class="nav-item {% if page == 'files' %}active{% endif %}"><span>◫</span>Files</a>
+      <a href="/queue" class="nav-item {% if page == 'queue' %}active{% endif %}"><span>≋</span>Processing Queue <b id="navQueueCount">0</b></a>
+      <p class="nav-label">Observability</p>
+      <a href="/threads" class="nav-item {% if page == 'threads' %}active{% endif %}"><span>⌘</span>Thread Monitor</a>
+      <a href="/history" class="nav-item {% if page == 'history' %}active{% endif %}"><span>↻</span>History</a>
+      <a href="/logs" class="nav-item {% if page == 'logs' %}active{% endif %}"><span>›_</span>Logs</a>
+      <a href="/reports" class="nav-item {% if page == 'reports' %}active{% endif %}"><span>R</span>Reports</a>
+      <p class="nav-label">System</p>
+      <a href="/settings" class="nav-item {% if page == 'settings' %}active{% endif %}"><span>⚙</span>Settings</a>
+      <a href="/about" class="nav-item {% if page == 'about' %}active{% endif %}"><span>?</span>About & Concepts</a>
+    </nav>
+    <div class="system-card">
+      <div><span class="pulse-dot"></span><strong id="sidebarStatus">System ready</strong></div>
+      <small><span id="sidebarWorkers">5</span> workers configured</small>
+      <div class="system-meter"><i id="sidebarMeter"></i></div>
+    </div>
+  </aside>
+  <button class="sidebar-backdrop" id="sidebarBackdrop" type="button" aria-label="Close navigation"></button>
+
+  <main class="main-shell">
+    <header class="topbar">
+      <button class="mobile-menu icon-button" id="menuButton" type="button" aria-label="Open navigation" aria-controls="sidebar" aria-expanded="false">&#9776;</button>
+      <div><p class="eyebrow">FILEFLOW / {{ page_title|upper }}</p><h1>{{ page_title }}</h1></div>
+      <div class="top-actions">
+        <div class="live-pill"><span></span> LIVE</div>
+        <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to light mode" title="Switch to light mode">
+          <span class="theme-icon" aria-hidden="true">☀</span><span class="theme-label">Light mode</span>
+        </button>
+        {% if page != 'threads' %}<button class="button button-demo" data-action="demo"><span>▶</span> Start Concurrent Demo</button>{% endif %}
+      </div>
+    </header>
+    {% block content %}{% endblock %}
+  </main>
+
+  <div class="toast-stack" id="toastStack" aria-live="polite"></div>
+  <script src="{{ url_for('static', filename='js/transitions.js', v=3) }}" defer></script>
+  <script src="{{ url_for('static', filename='js/app.js', v=10) }}" defer></script>
+</body>
+</html>
