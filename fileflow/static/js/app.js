@@ -49,6 +49,13 @@ async function api(url, options = {}) {
 }
 function badge(status, extra = "") { const label = status === "processing" ? "running" : status; return `<span class="badge ${esc(status)} ${extra}">${esc(label)}</span>`; }
 function progress(value) { const safe = Math.max(0, Math.min(100, Number(value || 0))); return `<div class="table-progress"><div class="progress-track"><i style="width:${safe}%"></i></div><span>${safe}%</span></div>`; }
+function revealLoaded(...nodes) {
+  nodes.filter(Boolean).forEach(node => {
+    if (node.dataset.contentRevealed) return;
+    node.dataset.contentRevealed = "true";
+    node.classList.add("data-revealed");
+  });
+}
 
 function workerMarkup(worker, compact = false) {
   const status = worker.status || "idle"; const number = String(worker.worker_id).padStart(2, "0");
@@ -135,6 +142,7 @@ function updateGlobal(data) {
     button.title = processing.active ? "A worker batch is already active" : (stats.pending ? `Run ${stats.pending} pending file(s)` : "No pending files");
   });
   $$('.run-task').forEach(button => button.disabled = processing.active);
+  revealLoaded($("#statsGrid"), $("#dashboardWorkers"), $("#recentActivity"), $("#dashboardLogs"), $("#threadGrid"), $("#completionOrder"), $("#monitorOverall"));
   if (page === "threads") document.title = processing.active ? `(${summary.running}) Processing · FileFlow` : defaultDocumentTitle;
 }
 
@@ -298,7 +306,7 @@ function renderFiles() {
     try { const result = await api(`/api/files/${button.dataset.id}`, {method:"DELETE"}); toast(result.message,"success"); loadFiles(); } catch(error){toast(error.message,"error");}
   }));
 }
-async function loadFiles() { if (!$("#filesTable")) return; try { cachedFiles = (await api("/api/files")).files; renderFiles(); } catch(error){toast(error.message,"error");} }
+async function loadFiles() { if (!$("#filesTable")) return; try { cachedFiles = (await api("/api/files")).files; renderFiles(); revealLoaded($("#filesTable")?.closest(".table-wrap"), $("#folderSummary")); } catch(error){toast(error.message,"error");} }
 
 async function loadTasks() {
   const body = $("#tasksTable"), monitorBody = $("#monitorPendingTasks");
@@ -321,12 +329,13 @@ async function loadTasks() {
       $$(".run-task", monitorBody).forEach(button => button.addEventListener("click", () => startAction("process", button, [Number(button.dataset.taskId)])));
       if (lastStatus?.processing?.active) $$(".run-task", monitorBody).forEach(button => button.disabled = true);
     }
+    revealLoaded(body?.closest(".table-wrap"), monitorBody?.closest(".table-wrap"));
   } catch(error){toast(error.message,"error");}
 }
 let cachedHistory = [];
 async function loadHistory() {
   const body = $("#historyTable"); if (!body) return;
-  try { cachedHistory = (await api("/api/history")).history; if ($("#historyResultsCount")) $("#historyResultsCount").textContent = `${cachedHistory.length} completed task${cachedHistory.length === 1 ? "" : "s"}`; if ($("#exportHistory")) { $("#exportHistory").disabled = cachedHistory.length === 0; $("#exportHistory").title = cachedHistory.length ? "Download processing history as CSV" : "No history to export"; } body.innerHTML = cachedHistory.length ? cachedHistory.map(item => `<tr><td><div class="file-cell"><span class="file-type-icon">${esc(extension(item.original_filename))}</span>${esc(item.original_filename)}</div></td><td>${item.is_duplicate ? badge("duplicate") : badge(item.status)}</td><td>${esc(item.category || "Others")}</td><td>${item.worker_id ? `Worker ${String(item.worker_id).padStart(2,"0")}` : "—"}</td><td class="hash">${esc(item.thread_id || "—")}</td><td class="hash">${esc(elapsedLabel(item.started_at,item.completed_at))}</td><td class="hash">${esc(item.short_hash || "—")}</td><td>${esc(niceTime(item.completed_at,true))}</td></tr>`).join("") : `<tr><td colspan="8"><div class="empty-state">No completed tasks yet.</div></td></tr>`; } catch(error){toast(error.message,"error");}
+  try { cachedHistory = (await api("/api/history")).history; if ($("#historyResultsCount")) $("#historyResultsCount").textContent = `${cachedHistory.length} completed task${cachedHistory.length === 1 ? "" : "s"}`; if ($("#exportHistory")) { $("#exportHistory").disabled = cachedHistory.length === 0; $("#exportHistory").title = cachedHistory.length ? "Download processing history as CSV" : "No history to export"; } body.innerHTML = cachedHistory.length ? cachedHistory.map(item => `<tr><td><div class="file-cell"><span class="file-type-icon">${esc(extension(item.original_filename))}</span>${esc(item.original_filename)}</div></td><td>${item.is_duplicate ? badge("duplicate") : badge(item.status)}</td><td>${esc(item.category || "Others")}</td><td>${item.worker_id ? `Worker ${String(item.worker_id).padStart(2,"0")}` : "—"}</td><td class="hash">${esc(item.thread_id || "—")}</td><td class="hash">${esc(elapsedLabel(item.started_at,item.completed_at))}</td><td class="hash">${esc(item.short_hash || "—")}</td><td>${esc(niceTime(item.completed_at,true))}</td></tr>`).join("") : `<tr><td colspan="8"><div class="empty-state">No completed tasks yet.</div></td></tr>`; revealLoaded(body.closest(".table-wrap")); } catch(error){toast(error.message,"error");}
 }
 
 let cachedReport = null;
@@ -348,6 +357,7 @@ async function loadReports() {
     const workerTotal = cachedReport.workers.reduce((sum, item) => sum + item.task_count, 0);
     $("#workerReport").innerHTML = cachedReport.workers.length ? cachedReport.workers.map(item => { const share = workerTotal ? item.task_count * 100 / workerTotal : 0; return `<div class="report-bar"><div><strong>Worker ${String(item.worker_id).padStart(2,"0")}</strong><span>${item.task_count} task${item.task_count === 1 ? "" : "s"} / ${fileSize(item.total_bytes)} / ${share.toFixed(1)}%</span></div><div class="report-track worker"><i style="width:${share}%"></i></div></div>`; }).join("") : `<div class="empty-state">No completed worker tasks to report yet.</div>`;
     $("#exportReport").disabled = false;
+    revealLoaded($(".report-toolbar"), $(".report-stats"), $("#categoryReport"), $("#workerReport"));
   } catch(error) { toast(error.message, "error"); }
 }
 
@@ -406,7 +416,7 @@ function initConcurrencyQuiz() {
 let logLevel = "all";
 async function loadLogs() {
   const terminal = $("#logTerminal"); if (!terminal) return;
-  try { const logs = (await api(`/api/logs?level=${logLevel}`)).logs; if ($("#logResultsCount")) $("#logResultsCount").textContent = `${logs.length} ${logLevel === "all" ? "recent" : logLevel} event${logs.length === 1 ? "" : "s"}`; terminal.innerHTML = logs.length ? [...logs].reverse().map(log => `<div class="log-line ${esc(log.level)}"><span class="log-time">${esc(niceTime(log.created_at,true))}</span><span class="log-event">${esc(log.event_type)}</span><span class="log-worker">${log.worker_id ? `worker-${String(log.worker_id).padStart(2,"0")}` : "system"}</span><span class="message">${esc(log.message)}</span></div>`).join("") : `<p class="muted">No matching log entries.</p>`; terminal.scrollTop = terminal.scrollHeight; } catch(error){toast(error.message,"error");}
+  try { const logs = (await api(`/api/logs?level=${logLevel}`)).logs; if ($("#logResultsCount")) $("#logResultsCount").textContent = `${logs.length} ${logLevel === "all" ? "recent" : logLevel} event${logs.length === 1 ? "" : "s"}`; terminal.innerHTML = logs.length ? [...logs].reverse().map(log => `<div class="log-line ${esc(log.level)}"><span class="log-time">${esc(niceTime(log.created_at,true))}</span><span class="log-event">${esc(log.event_type)}</span><span class="log-worker">${log.worker_id ? `worker-${String(log.worker_id).padStart(2,"0")}` : "system"}</span><span class="message">${esc(log.message)}</span></div>`).join("") : `<p class="muted">No matching log entries.</p>`; terminal.scrollTop = terminal.scrollHeight; revealLoaded(terminal); } catch(error){toast(error.message,"error");}
 }
 
 function pollPageData() { loadFiles(); loadTasks(); loadHistory(); loadLogs(); loadReports(); }
