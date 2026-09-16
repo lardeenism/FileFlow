@@ -25,16 +25,17 @@
     loader.setAttribute("aria-hidden", "false");
     body.classList.add("page-leaving");
     body.setAttribute("aria-busy", "true");
-    window.setTimeout(() => window.location.assign(destination), reducedMotion ? 0 : 180);
+    window.setTimeout(() => window.location.assign(destination), reducedMotion ? 0 : 60);
   }
 
   window.FileFlowNavigation = {navigate};
 
   requestAnimationFrame(() => body.classList.add("page-mounted"));
 
+  // Application pages render immediately; only the long landing page reveals sections on scroll.
   const revealTargets = body.matches(".landing-page")
     ? document.querySelectorAll(".landing-metrics, .landing-section, .landing-final")
-    : document.querySelectorAll(".page-content > *");
+    : [];
 
   revealTargets.forEach((element, index) => {
     element.classList.add("reveal-on-scroll");

@@ -138,10 +138,23 @@ function updateGlobal(data) {
   if (page === "threads") document.title = processing.active ? `(${summary.running}) Processing · FileFlow` : defaultDocumentTitle;
 }
 
+const statusCacheKey = "fileflow-last-status";
 let lastStatus = null;
+try {
+  const cachedStatus = JSON.parse(sessionStorage.getItem(statusCacheKey) || "null");
+  if (cachedStatus && Date.now() - cachedStatus.savedAt < 10000) {
+    lastStatus = cachedStatus.data;
+    updateGlobal(lastStatus);
+  }
+} catch {
+  sessionStorage.removeItem(statusCacheKey);
+}
 async function pollStatus() {
-  try { lastStatus = await api("/api/status"); updateGlobal(lastStatus); }
-  catch (error) { console.error(error); }
+  try {
+    lastStatus = await api("/api/status");
+    sessionStorage.setItem(statusCacheKey, JSON.stringify({savedAt: Date.now(), data: lastStatus}));
+    updateGlobal(lastStatus);
+  } catch (error) { console.error(error); }
   setTimeout(pollStatus, lastStatus?.processing?.active ? 700 : 2200);
 }
 
