@@ -80,10 +80,10 @@ function renderEngineWorkers(workers) {
     const radians = orbitAngle * Math.PI / 180;
     const x = 50 + 50 * Math.cos(radians);
     const y = 50 + 50 * Math.sin(radians);
-    workerNodes.push(`<span data-orbit-worker style="--orbit-x:${x.toFixed(2)}%;--orbit-y:${y.toFixed(2)}%">W${index + 1}</span>`);
+    workerNodes.push(`<span data-orbit-worker style="--orbit-x:${x.toFixed(2)}%;--orbit-y:${y.toFixed(2)}%;--worker-delay:${(-index * .7).toFixed(2)}s">W${index + 1}</span>`);
 
     const flowAngle = count === 1 ? 0 : -24 + (48 * index / (count - 1));
-    flowNodes.push(`<i style="--flow-angle:${flowAngle.toFixed(2)}deg"></i>`);
+    flowNodes.push(`<i style="--flow-angle:${flowAngle.toFixed(2)}deg;--flow-delay:${(-index * .32).toFixed(2)}s"></i>`);
   }
   orbit.insertAdjacentHTML("beforeend", workerNodes.join(""));
   lines.innerHTML = flowNodes.join("");
@@ -350,7 +350,7 @@ async function loadReports() {
     $("#reportDuration").textContent = `${Number(summary.average_duration_seconds).toFixed(3)}s`;
     $("#reportFailed").textContent = summary.failed;
     $("#reportTotal").textContent = summary.total_files;
-    $("#reportGenerated").textContent = `Generated ${niceTime(cachedReport.generated_at, true)} from persisted Supabase PostgreSQL records`;
+    $("#reportGenerated").textContent = `Generated ${niceTime(cachedReport.generated_at, true)} from persisted MySQL records`;
     $("#reportScope").textContent = cachedReport.scope_note;
     const categoryMax = Math.max(1, ...cachedReport.categories.map(item => item.file_count));
     $("#categoryReport").innerHTML = cachedReport.categories.length ? cachedReport.categories.map(item => `<div class="report-bar"><div><strong>${esc(item.category)}</strong><span>${item.file_count} file${item.file_count === 1 ? "" : "s"} / ${fileSize(item.total_bytes)}</span></div><div class="report-track"><i style="width:${item.file_count * 100 / categoryMax}%"></i></div></div>`).join("") : `<div class="empty-state">No completed files to report yet.</div>`;

@@ -155,7 +155,7 @@ tasks.join()</code></pre><p>A thread-safe FIFO structure distributes each task t
 
 {% elif page == 'reports' %}
   <section class="report-toolbar panel glass">
-    <div><span class="section-tag">SUPABASE-BACKED SNAPSHOT</span><h3>Operational summary</h3><small id="reportGenerated">Loading report...</small></div>
+    <div><span class="section-tag">MYSQL-BACKED SNAPSHOT</span><h3>Operational summary</h3><small id="reportGenerated">Loading report...</small></div>
     <div class="panel-actions"><button class="button button-ghost button-small" id="printReport" type="button">Print / PDF</button><button class="button button-primary button-small" id="exportReport" type="button" disabled>Export CSV</button></div>
   </section>
   <section class="stats-grid report-stats">
@@ -172,7 +172,7 @@ tasks.join()</code></pre><p>A thread-safe FIFO structure distributes each task t
   </section>
 
 {% elif page == 'about' %}
-  <section class="about-hero glass"><span class="section-tag">MASTER CONCURRENCY</span><h2>Unlock hardware potential safely.</h2><p>FileFlow is an I/O-bound teaching system built with a shared queue, native Python worker threads, explicit synchronization, Supabase PostgreSQL, and confined file storage.</p></section>
+  <section class="about-hero glass"><span class="section-tag">MASTER CONCURRENCY</span><h2>Unlock hardware potential safely.</h2><p>FileFlow is an I/O-bound teaching system built with a shared queue, native Python worker threads, explicit synchronization, XAMPP MySQL, and confined file storage.</p></section>
   <section class="concept-grid concurrency-checklist">
     <article class="panel glass"><span class="concept-number">01</span><h3>Shared memory</h3><p>Threads in one process share application state. FileFlow protects live worker telemetry with an <code>RLock</code>.</p></article>
     <article class="panel glass"><span class="concept-number">02</span><h3>Native threads</h3><p><code>threading.Thread</code> maps to native threads in CPython. FileFlow records each worker's <code>get_native_id()</code> value.</p></article>
@@ -188,7 +188,7 @@ tasks.join()</code></pre><p>A thread-safe FIFO structure distributes each task t
       </form>
     </article>
     <article class="panel glass context-panel"><span class="section-tag">CONTEXT SWITCH</span><h3>Thread versus process</h3><div class="switch-comparison"><div><b>THREAD</b><span>Registers</span><span>Stack pointer</span><span>Program counter</span><small>Usually retains the process address-space context.</small></div><div><b>PROCESS</b><span>Registers</span><span>Address-space context</span><span>Memory/cache effects</span><small>May require additional mapping and translation work; modern CPUs can preserve some TLB entries.</small></div></div></article>
-    <article class="panel glass architecture-card span-two"><span class="section-tag">SYSTEM ARCHITECTURE</span><h3>From browser to organized storage</h3><div class="architecture-flow"><span>Vanilla UI</span><i>-</i><span>Flask Routes</span><i>-</i><span>FIFO Queue</span><i>-</i><span>Native Workers</span><i>-</i><span>Locks</span><i>-</i><span>Supabase PostgreSQL + Storage</span></div></article>
+    <article class="panel glass architecture-card span-two"><span class="section-tag">SYSTEM ARCHITECTURE</span><h3>From browser to organized storage</h3><div class="architecture-flow"><span>Vanilla UI</span><i>-</i><span>Flask Routes</span><i>-</i><span>FIFO Queue</span><i>-</i><span>Native Workers</span><i>-</i><span>Locks</span><i>-</i><span>XAMPP MySQL + Storage</span></div></article>
   </section>
 
 {% elif page == 'settings' %}
@@ -201,7 +201,7 @@ tasks.join()</code></pre><p>A thread-safe FIFO structure distributes each task t
       <div class="setting-icon amber">⇄</div><div><span class="section-tag">EDUCATIONAL LAB</span><h3>Safe vs Unsafe synchronization</h3><p>Run real threads against shared mutable counters. The unsafe experiment coordinates stale reads to expose lost updates; the safe one uses <code>Lock</code>.</p><button class="button button-ghost" id="syncDemo">Run race condition demo</button><div class="sync-results" id="syncResults"></div></div>
     </article>
     <article class="panel glass safety-card"><span class="section-tag">UPLOAD SAFETY</span><h3>Guardrails enabled</h3><ul><li><b>✓</b> secure filename normalization</li><li><b>✓</b> storage-root path confinement</li><li><b>✓</b> collision-free output names</li><li><b>✓</b> executable extension blocklist</li><li><b>✓</b> {{ config.MAX_UPLOAD_LABEL }} request limit</li></ul></article>
-    <article class="panel glass architecture-card"><span class="section-tag">SYSTEM ARCHITECTURE</span><h3>Layered and modular</h3><div class="architecture-flow"><span>Presentation</span><i>↓</i><span>Flask Routes</span><i>↓</i><span>Service Layer</span><i>↓</i><span>Processing Manager</span><i>↓</i><span>Workers</span><i>↓</i><span>Supabase PostgreSQL + Storage</span></div></article>
+    <article class="panel glass architecture-card"><span class="section-tag">SYSTEM ARCHITECTURE</span><h3>Layered and modular</h3><div class="architecture-flow"><span>Presentation</span><i>↓</i><span>Flask Routes</span><i>↓</i><span>Service Layer</span><i>↓</i><span>Processing Manager</span><i>↓</i><span>Workers</span><i>↓</i><span>XAMPP MySQL + Storage</span></div></article>
   </section>
 {% endif %}
 </section>

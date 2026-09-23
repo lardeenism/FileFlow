@@ -39,7 +39,7 @@
           <button class="button button-demo landing-demo" id="landingDemo"><span>▶</span> Run 5-thread demo</button>
         </div>
         <div class="landing-notice" id="landingNotice" role="status" aria-live="polite"></div>
-        <div class="tech-list"><span>threading.Thread</span><span>queue.Queue</span><span>threading.Lock</span><span>PostgreSQL</span></div>
+        <div class="tech-list"><span>threading.Thread</span><span>queue.Queue</span><span>threading.Lock</span><span>MySQL</span></div>
       </div>
 
       <div class="landing-runtime glass" aria-label="Concurrent processing visualization">
@@ -71,7 +71,7 @@
         <article class="glass"><span class="feature-glyph blue">≋</span><h3>Thread-safe queue</h3><p>A synchronized FIFO queue distributes every task to exactly one available worker.</p><code>queue.Queue()</code></article>
         <article class="glass"><span class="feature-glyph amber">◆</span><h3>Atomic organization</h3><p>A Lock protects duplicate decisions and file movement from race conditions.</p><code>with organization_lock:</code></article>
         <article class="glass"><span class="feature-glyph green">#</span><h3>SHA-256 detection</h3><p>Content hashes identify identical files even when their filenames are different.</p><code>hashlib.sha256()</code></article>
-        <article class="glass"><span class="feature-glyph violet">▦</span><h3>Supabase PostgreSQL</h3><p>Files, tasks, settings, worker assignments, and logs persist securely in a cloud database.</p><code>PostgreSQL + SSL</code></article>
+        <article class="glass"><span class="feature-glyph violet">▦</span><h3>XAMPP MySQL</h3><p>Files, tasks, settings, worker assignments, and logs persist in the local database.</p><code>MySQL + InnoDB</code></article>
         <article class="glass"><span class="feature-glyph red">›_</span><h3>Live observability</h3><p>Monitor queue activity, progress, errors, Lock events, and batch completion.</p><code>Queue.join() + join()</code></article>
       </div>
     </section>
@@ -89,7 +89,7 @@
 
     <section class="landing-section architecture-section" id="architecture">
       <div class="architecture-copy"><span class="section-tag">LAYERED ARCHITECTURE</span><h2>Modular by design.<br><em>Observable by default.</em></h2><p>Each layer has one clear responsibility, keeping the code beginner-friendly and presentation-ready.</p><a href="/settings" class="button button-ghost">Explore system concepts →</a></div>
-      <div class="landing-layers glass"><span>HTML · CSS · JavaScript <small>PRESENTATION</small></span><i>↓</i><span>Flask Routes <small>CONTROLLER</small></span><i>↓</i><span>File Services <small>BUSINESS LOGIC</small></span><i>↓</i><span>Processing Manager <small>CONCURRENCY</small></span><i>↓</i><span>Supabase + File System <small>PERSISTENCE</small></span></div>
+      <div class="landing-layers glass"><span>HTML · CSS · JavaScript <small>PRESENTATION</small></span><i>↓</i><span>Flask Routes <small>CONTROLLER</small></span><i>↓</i><span>File Services <small>BUSINESS LOGIC</small></span><i>↓</i><span>Processing Manager <small>CONCURRENCY</small></span><i>↓</i><span>MySQL + File System <small>PERSISTENCE</small></span></div>
     </section>
 
     <section class="landing-final glass">
@@ -97,7 +97,7 @@
     </section>
   </main>
 
-  <footer class="landing-footer"><a class="brand" href="/"><span class="brand-mark"><i></i><i></i><i></i></span><span><strong>FileFlow</strong><small>CONCURRENCY LAB</small></span></a><p>Computer Science · Concurrent File Processing & Organizer System</p><small>Python · Flask · Supabase PostgreSQL · Vanilla JavaScript</small></footer>
+  <footer class="landing-footer"><a class="brand" href="/"><span class="brand-mark"><i></i><i></i><i></i></span><span><strong>FileFlow</strong><small>CONCURRENCY LAB</small></span></a><p>Computer Science · Concurrent File Processing & Organizer System</p><small>Python · Flask · XAMPP MySQL · Vanilla JavaScript</small></footer>
   <script src="{{ url_for('static', filename='js/transitions.js', v=8) }}" defer></script>
   <script src="{{ url_for('static', filename='js/landing.js', v=5) }}" defer></script>
 </body>
